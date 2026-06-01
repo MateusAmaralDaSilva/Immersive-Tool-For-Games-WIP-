@@ -10,6 +10,10 @@ import numpy as np
 # 16 kHz e o padrao esperado tanto pelo Vosk quanto pelo Whisper.
 SAMPLE_RATE = 16000
 
+# Tamanho do bloco lido por vez no modo tempo real (em amostras).
+# 1600 amostras @ 16 kHz = 0,1 s por bloco -> deteccao de pausa mais granular.
+STREAM_BLOCK = 1600
+
 
 def stream_chunks(blocksize=4000):
     """Abre o microfone e gera blocos de audio cru (int16) continuamente."""
@@ -45,3 +49,25 @@ def record_until_enter():
         input()
 
     return np.concatenate(frames, axis=0).flatten()
+
+
+def stream_float_chunks():
+    """Gera blocos de audio float32 mono continuamente.
+
+    Usado pelo Whisper em tempo real, que precisa de float32 (e nao int16
+    como o Vosk) para medir energia e transcrever.
+    """
+    stream = sd.InputStream(
+        samplerate=SAMPLE_RATE,
+        blocksize=STREAM_BLOCK,
+        channels=1,
+        dtype="float32",
+    )
+    stream.start()
+    try:
+        while True:
+            data, _ = stream.read(STREAM_BLOCK)
+            yield data.flatten()
+    finally:
+        stream.stop()
+        stream.close()

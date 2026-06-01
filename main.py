@@ -17,8 +17,9 @@ WHISPER_MODEL_SIZE = "small"
 
 def main():
     print("Qual motor voce quer testar?")
-    print("  1 - Vosk    (tempo real / streaming)")
-    print("  2 - Whisper (grava e transcreve)")
+    print("  1 - Vosk             (tempo real / streaming)")
+    print("  2 - Whisper          (grava e transcreve)")
+    print("  3 - Whisper tempo real (transcreve a cada pausa)")
     escolha = input("Opcao: ").strip()
 
     if escolha == "1":
@@ -27,6 +28,9 @@ def main():
     elif escolha == "2":
         import engine_whisper
         engine_whisper.run(WHISPER_MODEL_SIZE)
+    elif escolha == "3":
+        import engine_whisper_realtime
+        engine_whisper_realtime.run(WHISPER_MODEL_SIZE)
     else:
         print("Opcao invalida.")
 
