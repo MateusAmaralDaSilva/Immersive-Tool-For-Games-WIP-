@@ -13,7 +13,7 @@ mas para producao voce passaria a transcricao para uma thread separada.
 """
 import numpy as np
 from faster_whisper import WhisperModel
-import mic
+import jobs.stt_jobs.mic as mic
 
 # Mesmo hardware do engine_whisper.py:
 DEVICE = "cuda"
@@ -70,4 +70,6 @@ def run(model_size="small"):
                     silence_blocks = 0
                     speaking = False
     except KeyboardInterrupt:
+        full_text = " ".join(s.text.strip() for s in model.transcribe(np.concatenate(buffer), language="pt")[0]).strip()
         print("\nEncerrado.")
+        return full_text.strip() 

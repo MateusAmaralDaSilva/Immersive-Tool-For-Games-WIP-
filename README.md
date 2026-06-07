@@ -27,6 +27,11 @@ sudo apt install portaudio19-dev
 
 Pegue um modelo em https://alphacephei.com/vosk/models (procure por português, ex.: `vosk-model-small-pt-0.3`), descompacte dentro da pasta `models/` e confira se o caminho bate com `VOSK_MODEL_PATH` no `main.py`.
 
+paths + resume:
+vosk-model-small-pt-0.3 -> Lightweight wideband model for Android and RPi
+vosk-model-pt-fb-v0.1.1-20220516_2113 -> Big model from FalaBrazil
+
+
 O Whisper **não** precisa de download manual — o faster-whisper baixa o modelo sozinho na primeira execução.
 
 ## 3. Rodar

@@ -6,23 +6,25 @@ O Vosk processa o audio em blocos enquanto voce fala:
 """
 import json
 from vosk import Model, KaldiRecognizer
-import mic
-
+import jobs.stt_jobs.mic as mic
 
 def run(model_path):
     print(f"Carregando modelo Vosk de: {model_path}")
     model = Model(model_path)
     recognizer = KaldiRecognizer(model, mic.SAMPLE_RATE)
-
+    full_text = ""
     print("Pronto. Fale algo (Ctrl+C para sair).\n")
     try:
         for chunk in mic.stream_chunks():
             if recognizer.AcceptWaveform(chunk):
                 texto = json.loads(recognizer.Result()).get("text", "")
                 if texto:
+                    full_text += texto + " "
                     print("Final  :", texto)
             else:
                 parcial = json.loads(recognizer.PartialResult()).get("partial", "")
-                print("Parcial:", parcial, end="          \r")
+                print("Parcial:", parcial, end="\r")
+            
     except KeyboardInterrupt:
         print("\nEncerrado.")
+        return full_text.strip()

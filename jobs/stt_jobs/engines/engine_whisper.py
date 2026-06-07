@@ -4,7 +4,7 @@ Diferente do Vosk, o Whisper nao e streaming nativo: a gente grava um
 trecho inteiro e so entao manda transcrever.
 """
 from faster_whisper import WhisperModel
-import mic
+import jobs.stt_jobs.mic as mic
 
 # Ajuste conforme seu hardware:
 #   device="cuda" + compute_type="int8_float16" -> ideal para a RTX 2060 (~4 GB VRAM)
@@ -24,3 +24,4 @@ def run(model_size="small"):
     print(f"(idioma: {info.language}, confianca: {info.language_probability:.2f})\n")
     for seg in segments:
         print(seg.text.strip())
+        return seg.text.strip()
