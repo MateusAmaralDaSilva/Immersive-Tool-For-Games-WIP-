@@ -7,69 +7,66 @@ Whisper nao e streaming nativo. O truque aqui:
 
 Resultado: o texto aparece logo apos cada frase, sem esperar voce terminar
 tudo. Nao e palavra-por-palavra como o Vosk, mas fica bem responsivo.
-
-Obs: a transcricao roda no mesmo loop da captura. Para um teste tudo bem,
-mas para producao voce passaria a transcricao para uma thread separada.
 """
 import numpy as np
 from faster_whisper import WhisperModel
-import jobs.stt_jobs.mic as mic
+import mic as mic
+from engines.base_engine import BaseEngine
 
-# Mesmo hardware do engine_whisper.py:
 DEVICE = "cuda"
 COMPUTE_TYPE = "int8_float16"
 
-# Ajuste fino da deteccao de fala:
-SILENCE_THRESHOLD = 0.01   # energia abaixo disso = silencio (suba se houver ruido)
-SILENCE_DURATION = 0.8     # segundos de pausa para encerrar a frase
-MIN_SPEECH_DURATION = 0.3  # ignora trechos curtos demais (cliques, ruidos)
+SILENCE_THRESHOLD = 0.01
+SILENCE_DURATION = 0.8
+MIN_SPEECH_DURATION = 0.3
 
 
 def _rms(audio):
-    """Energia (volume) do bloco: raiz da media dos quadrados."""
     return float(np.sqrt(np.mean(audio ** 2)))
 
 
-def run(model_size="small"):
-    print(f"Carregando Whisper '{model_size}' ({DEVICE}/{COMPUTE_TYPE})...")
-    model = WhisperModel(model_size, device=DEVICE, compute_type=COMPUTE_TYPE)
+class WhisperRealtimeEngine(BaseEngine):
 
-    # Converte as duracoes (em segundos) para quantidade de blocos/amostras.
-    blocks_per_second = mic.SAMPLE_RATE / mic.STREAM_BLOCK
-    silence_limit = int(SILENCE_DURATION * blocks_per_second)
-    min_speech_samples = int(MIN_SPEECH_DURATION * mic.SAMPLE_RATE)
+    def __init__(self, model_size: str = "small"):
+        self.model_size = model_size
 
-    def transcrever(audio):
-        segments, _ = model.transcribe(audio, language="pt")
-        texto = " ".join(s.text.strip() for s in segments).strip()
-        if texto:
-            print(">", texto)
+    def transcribe(self) -> str:
+        print(f"Carregando Whisper '{self.model_size}' ({DEVICE}/{COMPUTE_TYPE})...")
+        model = WhisperModel(self.model_size, device=DEVICE, compute_type=COMPUTE_TYPE)
 
-    print("Pronto. Fale; a transcricao aparece a cada pausa (Ctrl+C para sair).\n")
+        blocks_per_second = mic.SAMPLE_RATE / mic.STREAM_BLOCK
+        silence_limit = int(SILENCE_DURATION * blocks_per_second)
+        min_speech_samples = int(MIN_SPEECH_DURATION * mic.SAMPLE_RATE)
 
-    buffer = []          # blocos de fala acumulados
-    silence_blocks = 0   # blocos seguidos de silencio
-    speaking = False
+        def transcrever(audio):
+            segments, _ = model.transcribe(audio, language="pt")
+            texto = " ".join(s.text.strip() for s in segments).strip()
+            if texto:
+                print(">", texto)
 
-    try:
-        for bloco in mic.stream_float_chunks():
-            if _rms(bloco) >= SILENCE_THRESHOLD:
-                # Esta falando: acumula e zera o contador de silencio.
-                buffer.append(bloco)
-                silence_blocks = 0
-                speaking = True
-            elif speaking:
-                # Pausa depois de ter falado: conta o silencio.
-                buffer.append(bloco)  # guarda o rabicho de silencio tambem
-                silence_blocks += 1
-                if silence_blocks >= silence_limit:
-                    audio = np.concatenate(buffer)
-                    if len(audio) >= min_speech_samples:
-                        transcrever(audio)
-                    buffer = []
+        print("Pronto. Fale; a transcricao aparece a cada pausa (Ctrl+C para sair).\n")
+
+        buffer = []
+        silence_blocks = 0
+        speaking = False
+
+        try:
+            for bloco in mic.stream_float_chunks():
+                if _rms(bloco) >= SILENCE_THRESHOLD:
+                    buffer.append(bloco)
                     silence_blocks = 0
-                    speaking = False
-    except KeyboardInterrupt:
-        full_text = " ".join(s.text.strip() for s in model.transcribe(np.concatenate(buffer), language="pt")[0]).strip()
-        print("\nEncerrado.")
-        return full_text.strip() 
+                    speaking = True
+                elif speaking:
+                    buffer.append(bloco)
+                    silence_blocks += 1
+                    if silence_blocks >= silence_limit:
+                        audio = np.concatenate(buffer)
+                        if len(audio) >= min_speech_samples:
+                            transcrever(audio)
+                        buffer = []
+                        silence_blocks = 0
+                        speaking = False
+        except KeyboardInterrupt:
+            full_text = " ".join(s.text.strip() for s in model.transcribe(np.concatenate(buffer), language="pt")[0]).strip()
+            print("\nEncerrado.")
+            return full_text.strip()

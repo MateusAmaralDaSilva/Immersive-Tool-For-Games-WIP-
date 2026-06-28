@@ -4,24 +4,27 @@ Diferente do Vosk, o Whisper nao e streaming nativo: a gente grava um
 trecho inteiro e so entao manda transcrever.
 """
 from faster_whisper import WhisperModel
-import jobs.stt_jobs.mic as mic
+import mic as mic
+from engines.base_engine import BaseEngine
 
-# Ajuste conforme seu hardware:
-#   device="cuda" + compute_type="int8_float16" -> ideal para a RTX 2060 (~4 GB VRAM)
-#   device="cpu"  + compute_type="int8"          -> se nao tiver GPU NVIDIA
 DEVICE = "cuda"
 COMPUTE_TYPE = "int8_float16"
 
 
-def run(model_size="small"):
-    print(f"Carregando Whisper '{model_size}' ({DEVICE}/{COMPUTE_TYPE})...")
-    model = WhisperModel(model_size, device=DEVICE, compute_type=COMPUTE_TYPE)
+class WhisperEngine(BaseEngine):
 
-    audio = mic.record_until_enter()
-    print("Transcrevendo...\n")
+    def __init__(self, model_size: str = "small"):
+        self.model_size = model_size
 
-    segments, info = model.transcribe(audio, language="pt")
-    print(f"(idioma: {info.language}, confianca: {info.language_probability:.2f})\n")
-    for seg in segments:
-        print(seg.text.strip())
-        return seg.text.strip()
+    def transcribe(self) -> str:
+        print(f"Carregando Whisper '{self.model_size}' ({DEVICE}/{COMPUTE_TYPE})...")
+        model = WhisperModel(self.model_size, device=DEVICE, compute_type=COMPUTE_TYPE)
+
+        audio = mic.record_until_enter()
+        print("Transcrevendo...\n")
+
+        segments, info = model.transcribe(audio, language="pt")
+        print(f"(idioma: {info.language}, confianca: {info.language_probability:.2f})\n")
+        for seg in segments:
+            print(seg.text.strip())
+            return seg.text.strip()
