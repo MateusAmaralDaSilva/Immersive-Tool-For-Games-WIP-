@@ -1,0 +1,24 @@
+# Arquivo: data/players/player_base.yaml
+
+id: ""
+nome: ""
+classe: ""
+raca: ""
+nivel_aparente: ""
+
+# --- IMAGEM E REPUTAÇÃO ---
+reputacao_na_regiao: ""
+postura: ""
+vestimenta: ""
+cheiro_ou_detalhes: ""
+
+# --- DADOS CONHECIDOS (Se o NPC reconhecer) ---
+crimes_conhecidos: ""
+faccao_aliada: ""
+
+# --- CAPACIDADES FÍSICAS (Perceptíveis) ---
+forca_fisica_aparente: ""
+agilidade_aparente: ""
+equipamento_visivel: 
+  - ""
+  - ""

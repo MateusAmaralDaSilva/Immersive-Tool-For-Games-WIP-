@@ -2,3 +2,6 @@ sounddevice
 numpy
 vosk
 faster-whisper
+PyYAML
+scikit-learn
+llama-cpp-python

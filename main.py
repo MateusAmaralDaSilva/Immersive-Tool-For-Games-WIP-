@@ -13,6 +13,7 @@ from jobs.stt_jobs.stt import speech_to_text
 from jobs.stt_jobs.engines.engine_vosk import VoskEngine
 from jobs.stt_jobs.engines.engine_whisper import WhisperEngine
 from jobs.stt_jobs.engines.engine_whisper_realtime import WhisperRealtimeEngine
+from jobs.stt_jobs.engines.engine_keyboard import KeyboardEngine
 
 from jobs.gen_jobs.gen import generate_text
 from jobs.gen_jobs.models.qwen_model import QwenModel
@@ -26,10 +27,28 @@ VOSK_MODEL_PATH = str(BASE_DIR / "models" / "stt_models" / "vosk" / "vosk-model-
 QWEN_MODEL_PATH = str(BASE_DIR / "models" / "gen_models" / "Qwen" / "Qwen3-4B-Q4_K_M.gguf")
 
 
+def choose_stt_engine():
+    print("Escolha a entrada de texto:")
+    print("1 - Teclado")
+    print("2 - Vosk")
+    print("3 - Whisper")
+    print("4 - Whisper em tempo real")
+
+    option = input("Opcao [1]: ").strip() or "1"
+    if option == "1":
+        return KeyboardEngine()
+    if option == "2":
+        return VoskEngine(VOSK_MODEL_PATH)
+    if option == "3":
+        return WhisperEngine(model_size="small")
+    if option == "4":
+        return WhisperRealtimeEngine(model_size="small")
+
+    raise ValueError("Opcao de entrada invalida. Escolha um numero de 1 a 4.")
+
+
 if __name__ == "__main__":
-    # Escolha o engine instanciando a classe desejada (sem condicionais):
-    #   VoskEngine(VOSK_MODEL_PATH) | WhisperEngine("small") | WhisperRealtimeEngine("small")
-    engine = WhisperRealtimeEngine(model_size="small")
+    engine = choose_stt_engine()
     text = speech_to_text(engine)
     print(f"Texto reconhecido: {text}")
 
@@ -37,10 +56,9 @@ if __name__ == "__main__":
     #   QwenModel(...) | MistralModel(...) | PhiModel(...) | DeepSeekModel(...)
     model = QwenModel(model_path=QWEN_MODEL_PATH)
     prompt = build_prompt(PromptData(
-        context=text,
-        player_profile="Jogador aventureiro, direto ao ponto.",
-        npc_profile="Guarda desconfiado do vilarejo.",
-        available_states=["conversar", "atacar", "fugir", "ignorar"],
+        npc_id="gareth",
+        player_id="ladino_01",
+        player_input=text,
     ))
     state = generate_text(prompt, model)
     print(f"Estado escolhido: {state}")

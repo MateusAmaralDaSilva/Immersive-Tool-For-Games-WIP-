@@ -20,7 +20,7 @@ class BaseModel(ABC):
         output = self.llm(
             prompt,
             max_tokens=10,
-            temperature=0.1,
+            temperature=0.0,
             stop=["\n"]
         )
         return output["choices"][0]["text"].strip()

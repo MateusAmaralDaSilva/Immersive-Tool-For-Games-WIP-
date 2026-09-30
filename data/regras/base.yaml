@@ -1,0 +1,35 @@
+# Arquivo: data/cenarios/cenario_base.yaml
+
+id_cenario: ""
+nome_local: ""
+regiao_macro: ""
+
+# Clima e Ambiente Físico
+clima_atual: ""
+iluminacao: ""
+nivel_de_barulho: ""
+multidao: ""
+
+# Leis e Regras do Local
+regras_locais:
+  - ""
+nivel_de_seguranca: ""
+
+# Atmosfera Tensa
+tensao_atual: ""
+eventos_ocorrendo: 
+  - ""
+
+task: >-
+  Classifique a fala do jogador de acordo com a intenção mais provável,
+  considerando o contexto fornecido. Não gere diálogo.
+options:
+  - ""
+
+bias: >-
+  ""
+few_shots:
+  - fala: ""
+    estado: ""
+
+

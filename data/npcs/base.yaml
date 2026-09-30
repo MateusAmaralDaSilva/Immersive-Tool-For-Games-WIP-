@@ -1,0 +1,39 @@
+# Arquivo: data/npcs/npc_base.yaml
+
+id: ""
+nome: ""
+papel: ""
+raca: ""
+idade: 
+
+# --- PSICOLÓGICO E PERSONALIDADE ---
+personalidade: ""
+alinhamento_moral: ""
+humor_atual: ""
+motivacao_principal: ""
+gatilhos_de_raiva: 
+  - ""
+  - ""
+medos: ""
+
+# --- CONHECIMENTO (LORE) ---
+conhecimento:
+  geral: ""
+  segredos: ""
+  ignorancia: ""
+
+# --- STATUS FÍSICO E INVENTÁRIO ---
+forca_fisica: ""
+agilidade: ""
+status_atual: ""
+equipamento:
+  armadura: ""
+  armas:
+    - ""
+    - ""
+
+# --- RELAÇÕES E FACÇÕES ---
+faccao: ""
+lealdade_a_faccao: ""
+relacoes_conhecidas:
+  - ""

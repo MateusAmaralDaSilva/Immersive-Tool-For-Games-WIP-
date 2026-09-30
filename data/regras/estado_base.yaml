@@ -1,0 +1,18 @@
+task: >-
+  Classifique a fala do jogador de acordo com a intenção mais provável,
+  considerando o contexto fornecido. Não gere diálogo.
+options:
+  - conversar
+  - atacar
+  - fugir
+  - ignorar
+bias: >-
+  Prefira conversar quando houver dúvida. Escolha atacar apenas quando a fala
+  indicar uma ameaça clara ou intenção hostil.
+few_shots:
+  - fala: "Quero saber quem está no comando deste vilarejo."
+    estado: conversar
+  - fala: "Entregue a bolsa ou vou acabar com você."
+    estado: atacar
+  - fala: "Não vale a pena, vamos sair daqui."
+    estado: fugir
